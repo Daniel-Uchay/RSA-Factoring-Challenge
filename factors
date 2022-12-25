@@ -1,33 +1,64 @@
 #!/usr/bin/python3
-def check_factor(my_list):
-    """check factor of number in a list"""
-    import sys
+from random import randint
 
-    if len(my_list) == 0 or my_list is None:
-        print("An error occured")
-    for q in my_list:
-       i = int(q)
-       for j in range(2, sys.maxsize):
-           if i % j == 0:
-               print("{:d}={:d}*{:d}".format(i, int(i/j), j))
-               break
 
-def factoring_challenge():
-    """factor two numbers"""
-    import sys
+def gcd(a, b):
+    while b:
+        a, b = b, a % b
+    return a
 
-    lis = sys.argv
-    if len(lis) < 2:
-        print("Error!:<USAGE> ./factors filename")
-        exit(98)
-    f_name = ''
-    if len(lis) == 2:
-        f_name = lis[1]
-    if len(lis) == 3:
-        f_name = lis[2]
-    with open(f_name) as file_in:
-        lines = []
-        for line in file_in:
-            lines.append(line)
-    check_factor(lines)
-factoring_challenge()
+
+def _pollard_brent(c, n, x):
+    y = (x ** 2) % n + c
+    if y >= n:
+        y -= n
+
+    assert 0 <= y < n
+    return y
+
+
+def factorise_b(n, iterations=None):
+    y, c, m = (randint(1, n - 1) for w in range(3))
+    r, q, g = 1, 1, 1
+    i = 0
+    while g == 1:
+        x = y
+        for w in range(r):
+            y = _pollard_brent(c, n, y)
+        k = 0
+        while k < r and g == 1:
+            ys = y
+            for _ in range(min(m, r - k)):
+                y = _pollard_brent(c, n, y)
+                q = (q * abs(x - y)) %  n
+            g = gcd(q, n)
+            k += m
+        r *= 2
+        if iterations:
+            i += 1
+            if i == iterations:
+                return None
+
+    if g == n:
+        while True:
+            ys = _pollard_brent(c, n, ys)
+            g = gcd(abs(x - ys), n)
+            if g > 1:
+                break
+    return g
+
+
+if __name__ == '__main__':
+    from sys import argv
+
+    if len(argv) != 2:
+        exit(1)
+
+    with open(argv[1], "r") as f:
+        for i in f:
+            n = int(i[:-1])
+            res = factorise_b(n)
+            print("{}={}*{}".format(n, n // res, res))
+
+
+
