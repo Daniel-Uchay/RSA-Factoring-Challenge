@@ -1,36 +1,33 @@
 #!/bin/python3
 import sys
+import threading
 
-def generate_primes(n):
-  # create a list of boolean values, with True for all indices >= 2
-  primes = [True] * (n+1)
-  primes[0] = primes[1] = False
-
-  for i in range(2, n+1):
-    if primes[i]:
-      # mark all multiples of i as not prime
-      for j in range(i*i, n+1, i):
-        primes[j] = False
-
-  # return a list of prime numbers
-  return [i for i, is_prime in enumerate(primes) if is_prime]
-
+# function to factorize a given number
 def factorize(n):
-  primes = generate_primes(n)
-
-  for p in primes:
-    if n % p == 0:
-      return (p, n // p)
-
+  for i in range(2, n):
+    if n % i == 0:
+      return (i, n // i)
   return (n, 1)
+
+# function to process a line from the input file
+def process_line(line):
+  n = int(line.strip())
+  p, q = factorize(n)
+  print(f"{n}={p}*{q}")
 
 # get filename from command line arguments
 filename = sys.argv[1]
 
 # open file and read each line
 with open(filename, 'r') as f:
+  # create a list of threads
+  threads = []
   for line in f:
-    n = int(line.strip())
-    p, q = factorize(n)
-    print(f"{n}={p}*{q}")
+    # create a thread for each line and start it
+    t = threading.Thread(target=process_line, args=(line,))
+    t.start()
+    threads.append(t)
+  # wait for all threads to finish
+  for t in threads:
+    t.join()
 
