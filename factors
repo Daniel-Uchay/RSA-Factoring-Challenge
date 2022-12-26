@@ -1,27 +1,33 @@
 #!/bin/bash
+
 # get filename from command line arguments
 filename=$1
 
 # read each line of the file
-while read line; do
-  # assign the value of the line to the variable 'n'
+while read -r line; do
   n=$line
-
-  # set p and q to 1 initially
-  p=1
-  q=1
-
-  # iterate through integers from 2 to n-1
-  for ((i=2; i<n; i++)); do
-    # check if i divides n evenly
-    if [[ $((n % i)) -eq 0 ]]; then
-      # if it does, set p and q to i and n/i respectively
-      p=$i
-      q=$((n / i))
-      break
+  # check if n is even
+  if [ $((n%2)) -eq 0 ]; then
+    # n is even, so 2 is a factor
+    p=2
+    q=$((n/2))
+  else
+    # n is odd, start checking odd factors starting from 3
+    for i in $(seq 3 2 $((n/2))); do
+      if [ $((n%i)) -eq 0 ]; then
+        # found a factor, exit loop
+        p=$i
+        q=$((n/i))
+        break
+      fi
+    done
+    # if no factor was found, set p=n and q=1
+    if [ -z "$p" ]; then
+      p=$n
+      q=1
     fi
-  done
-
-  # print the factorization in the required format
-  echo "$n=$p*$q"
+  fi
+  # print the factorization
+  echo "${n}=${p}*${q}"
 done < "$filename"
+
