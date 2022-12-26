@@ -1,33 +1,27 @@
-#!/bin/python3
-import sys
-import threading
-
-# function to factorize a given number
-def factorize(n):
-  for i in range(2, n):
-    if n % i == 0:
-      return (i, n // i)
-  return (n, 1)
-
-# function to process a line from the input file
-def process_line(line):
-  n = int(line.strip())
-  p, q = factorize(n)
-  print(f"{n}={p}*{q}")
-
+#!/bin/bash
 # get filename from command line arguments
-filename = sys.argv[1]
+filename=$1
 
-# open file and read each line
-with open(filename, 'r') as f:
-  # create a list of threads
-  threads = []
-  for line in f:
-    # create a thread for each line and start it
-    t = threading.Thread(target=process_line, args=(line,))
-    t.start()
-    threads.append(t)
-  # wait for all threads to finish
-  for t in threads:
-    t.join()
+# read each line of the file
+while read line; do
+  # assign the value of the line to the variable 'n'
+  n=$line
 
+  # set p and q to 1 initially
+  p=1
+  q=1
+
+  # iterate through integers from 2 to n-1
+  for ((i=2; i<n; i++)); do
+    # check if i divides n evenly
+    if [[ $((n % i)) -eq 0 ]]; then
+      # if it does, set p and q to i and n/i respectively
+      p=$i
+      q=$((n / i))
+      break
+    fi
+  done
+
+  # print the factorization in the required format
+  echo "$n=$p*$q"
+done < "$filename"
