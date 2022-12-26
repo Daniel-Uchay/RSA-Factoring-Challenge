@@ -1,11 +1,27 @@
 #!/bin/python3
-
 import sys
 
+def generate_primes(n):
+  # create a list of boolean values, with True for all indices >= 2
+  primes = [True] * (n+1)
+  primes[0] = primes[1] = False
+
+  for i in range(2, n+1):
+    if primes[i]:
+      # mark all multiples of i as not prime
+      for j in range(i*i, n+1, i):
+        primes[j] = False
+
+  # return a list of prime numbers
+  return [i for i, is_prime in enumerate(primes) if is_prime]
+
 def factorize(n):
-  for i in range(2, n):
-    if n % i == 0:
-      return (i, n // i)
+  primes = generate_primes(n)
+
+  for p in primes:
+    if n % p == 0:
+      return (p, n // p)
+
   return (n, 1)
 
 # get filename from command line arguments
